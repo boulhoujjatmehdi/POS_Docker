@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-app
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./pos_alnasr:/var/www
+      - ./docker/php/script.sh:/script.sh
+      - ./.env:/var/www/.env
+    networks:
+      - laravel
+
+  webserver:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./pos_alnasr:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - laravel
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD_ROOT}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./database_data:/var/lib/mysql
+    networks:
+      - laravel
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80" # Expose phpMyAdmin on port 8080 of the host
+    environment:
+      PMA_HOST: db # Use the service name of your MySQL container
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD_ROOT} # Use the same root password as defined for your MySQL service
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+
+
