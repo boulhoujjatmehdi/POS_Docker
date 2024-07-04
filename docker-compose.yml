@@ -9,6 +9,8 @@ services:
     container_name: laravel-app
     restart: unless-stopped
     working_dir: /var/www
+    expose:
+      - 9000
     volumes:
       - ./pos_alnasr:/var/www
       - ./docker/php/script.sh:/script.sh
